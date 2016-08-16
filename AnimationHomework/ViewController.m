@@ -18,6 +18,8 @@
 
 @property (strong, nonatomic) NSArray* cornerViews;
 
+@property (strong, nonatomic) NSArray* imageNames;
+
 @end
 
 @implementation ViewController
@@ -85,6 +87,12 @@
     
     self.cornerViews = [NSArray arrayWithObjects:topLeft, topRight, bottomRight, bottomLeft, nil];
     
+    /* ANIMATED from IMAGES */
+    
+    self.imageNames = @[@"win_1.png", @"win_2.png", @"win_3.png", @"win_4.png",
+                            @"win_5.png", @"win_6.png", @"win_7.png", @"win_8.png",
+                            @"win_9.png", @"win_10.png", @"win_11.png", @"win_12.png",
+                            @"win_13.png", @"win_14.png", @"win_15.png", @"win_16.png"];
 }
 
 - (void) viewDidAppear:(BOOL)animated {
@@ -94,6 +102,25 @@
     [self moveView:_view4 withAnimationOption:UIViewAnimationOptionCurveEaseInOut];
     
     [self moveCornerViews:self.cornerViews withClockwiseDirection:arc4random() % 2];
+    
+    [self animationFromImages:self.imageNames];
+
+}
+
+- (void) animationFromImages:(NSArray *) arrayOfImages {
+    
+    NSMutableArray *images = [[NSMutableArray alloc] init];
+    for (int i = 0; i < arrayOfImages.count; i++) {
+        [images addObject:[UIImage imageNamed:[arrayOfImages objectAtIndex:i]]];
+    }
+    
+    // Normal Animation
+    UIImageView *animationImageView = [[UIImageView alloc] initWithFrame:CGRectMake(CGRectGetMidX(self.view.frame)- 43, 700, 86, 193)];
+    animationImageView.animationImages = images;
+    animationImageView.animationDuration = 0.7;
+    
+    [self.view addSubview:animationImageView];
+    [animationImageView startAnimating];
 
 }
 
@@ -110,14 +137,15 @@
      
 }
 
-
 // Is it method valid ?
+
 - (void) moveCornerViews:(NSArray *)views withClockwiseDirection:(BOOL) clockwiseDirection  {
 
-        [UIView animateWithDuration:3
+        [UIView animateWithDuration:2
                               delay:0
                             options:UIViewAnimationOptionCurveLinear
                          animations:^{
+                             
                              
                              UIView* firstView = views[0];
                              UIView* lastView = views[[views count] - 1];
@@ -128,15 +156,18 @@
                                  UIColor *color = firstView.backgroundColor;
                                  
                                  for (int i = 0; i < [views count] - 1; i++) {
-                                     UIView* view = views[i];
+                                     UIView* currentView = views[i];
                                      UIView* nextView = views[i+1];
                                      
-                                     view.center = nextView.center;
-                                     view.backgroundColor = nextView.backgroundColor;
+                                     currentView.center = nextView.center;
+                                     currentView.backgroundColor = nextView.backgroundColor;
+                                     currentView.transform = CGAffineTransformMakeRotation(M_PI); // ROTATION BAD(
+                                     
                                  }
                                  
                                  lastView.center = center;
                                  lastView.backgroundColor = color;
+                                 lastView.transform =  CGAffineTransformMakeRotation(-M_PI); // ROTATION BAD(
                                  
                              } else {
                                  
@@ -149,15 +180,20 @@
                                      
                                      currentView.center = previousView.center;
                                      currentView.backgroundColor = previousView.backgroundColor;
+                                     currentView.transform = CGAffineTransformMakeRotation(M_PI); // ROTATION BAD(
                                  }
                                  
                                  firstView.center = center;
                                  firstView.backgroundColor = color;
+                                 firstView.transform = CGAffineTransformMakeRotation(M_PI);
                                  
                              }
                              
                          } completion:^(BOOL finished) {
                              NSLog(@"Corner view's animation is finished with Clockwise direction: %hhd", clockwiseDirection);
+                             for (UIView * view in views) {
+                                 view.transform = CGAffineTransformIdentity;
+                             }
                              [self moveCornerViews:self.cornerViews withClockwiseDirection:arc4random() % 2];
                          }];
     
